@@ -65,13 +65,11 @@ class Stack
         top = 0;
     }
 
-    void push(Number number){
-        arr[++top] = &number;
+    void push(Token* value){
+        arr[++top] = value;
     }
 
-    void push(Operator oper){
-        arr[++top] = &oper;
-    }
+    
     Token* pop(){
         return arr[top--];
     }
@@ -93,11 +91,7 @@ class Express
         this->str = str;
         length = strlen(str);
     }
-    ~Express(){
-        for (int i = 0; i < data.getTop(); i++){
-            delete data.pop();
-        }
-    }
+    
 
     void parse();
     float solve();
@@ -106,50 +100,71 @@ class Express
 void Express::parse(){
     char temp[SIZE];
     char ch;
+    Number* number;
+    Operator* oper;
     float lastValue;
     char lastOperator;
+    Token* toDelete;
 
     for (int i = 0; i < length; i++){
         ch = str[i];
 
         if (ch >= '0' && ch <= '9'){
             int j = 0;
-            while (str[i] = '.' || (str[i] >= '0' && str[i] <= '9')){
+            while (str[i] == '.' || (str[i] >= '0' && str[i] <= '9')){
                 temp[j++] = str[i++];
             }
-            data.push(Number(atof(temp)));
-            for (j; j >= 0; j--){
-                temp[j] = '/0';
+            i--;
+            number = new Number(atof(temp));
+            data.push(number);
+            while (j >= 0){
+                temp[j--] = '0';
             }
         }
         else if(ch == '+' || ch == '-' || ch == '*' || ch == '/'){
             if (data.getTop() == 1){
-                data.push(Operator(ch));
+                oper = new Operator(ch);
+                data.push(oper);
             }
             else{
                 lastValue = data.pop()->getNumber();
                 lastOperator = data.pop()->getOperator();
-
+                
                 if ((ch == '*' || ch == '/') && (lastOperator ==  '+' || lastOperator == '-')){
-                    data.push(Operator (lastOperator));
-                    data.push(Number (lastValue));
+                    data.push(oper);
+                    data.push(number);
                 }
                 else{
+                    delete number;
+                    delete oper;
+
                     switch(lastOperator){
                         case '+':{
-                            data.push(Number(data.pop()->getNumber() + lastValue));
+                            toDelete = data.pop();
+                            number = new Number(lastValue + toDelete->getNumber());
+                            delete toDelete;
+                            data.push(number);
                             break;
                         }
                         case '-':{
-                            data.push(Number(data.pop()->getNumber() - lastValue));
+                            toDelete = data.pop();
+                            number = new Number(lastValue - toDelete->getNumber());
+                            delete toDelete;
+                            data.push(number);
                             break;
                         }
                         case '*':{
-                            data.push(Number(data.pop()->getNumber() * lastValue));
+                            toDelete = data.pop();
+                            number = new Number(lastValue * toDelete->getNumber());
+                            delete toDelete;
+                            data.push(number);
                             break;
                         }
                         case '/':{
-                            data.push(Number(data.pop()->getNumber() / lastValue));
+                            toDelete = data.pop();
+                            number = new Number(lastValue / toDelete->getNumber());
+                            delete toDelete;
+                            data.push(number);
                             break;
                         }
                         default:{
@@ -158,7 +173,8 @@ void Express::parse(){
                         }
                     }
                 }
-                data.push(Operator(ch));
+                oper = new Operator(ch);
+                data.push(oper);
             }
 
         }
@@ -171,24 +187,42 @@ void Express::parse(){
 
 float Express::solve(){
     float lastValue;
+    Token* toDelete;
+    Number* number;
+    
 
     while(data.getTop() > 1){
-        lastValue = data.pop()->getNumber();
+        toDelete = data.pop();
+        lastValue = toDelete->getNumber();
+        delete toDelete;
+        
         switch(data.pop()->getOperator()){
             case '+':{
-                data.push(Number(data.pop()->getNumber() + lastValue));
+                toDelete = data.pop();
+                number = new Number(lastValue + toDelete->getNumber());
+                delete toDelete;
+                data.push(number);
                 break;
             }
             case '-':{
-                data.push(Number(data.pop()->getNumber() - lastValue));
+                toDelete = data.pop();
+                number = new Number(lastValue - toDelete->getNumber());
+                delete toDelete;
+                data.push(number);
                 break;
             }
             case '*':{
-                data.push(Number(data.pop()->getNumber() * lastValue));
-                break;
+                toDelete = data.pop();
+                number = new Number(lastValue * toDelete->getNumber());
+                delete toDelete;
+                data.push(number);
+                break;;
             }
             case '/':{
-                data.push(Number(data.pop()->getNumber() / lastValue));
+                toDelete = data.pop();
+                number = new Number(lastValue / toDelete->getNumber());
+                delete toDelete;
+                data.push(number);
                 break;
             }
             default:{
@@ -216,5 +250,8 @@ int main()
         delete eptr;
     
 }
+
+
+
 
 
