@@ -8,7 +8,7 @@ struct Node //ветка бинарного дерева
     Node *left;  //указатель на левую ветку
     Node *right; //указатель на правую ветку
 
-    Node(int data, Node *left = nullptr, Node *right = nullptr)
+    Node(int data = 0, Node *left = nullptr, Node *right = nullptr)
     {
         this->data = data;
         this->left = left;
@@ -19,12 +19,13 @@ struct Node //ветка бинарного дерева
 class BinaryTree //бинарное дерево
 {
 public:
-    BinaryTree();                      //конструктор
-    ~BinaryTree();                     //деструктор
-    void insert(int data, Node *leaf); //вставка нового элемента
-    void insert(int data);             //вставка нового элемента
-    void print_inorder_to_file(Node *leaf);
-    void print_inorder_to_file();
+    BinaryTree();                           //конструктор
+    void insert(int data, Node *leaf);      //вставка нового элемента
+    void insert(int data);                  //вставка нового элемента
+    void print_inorder(Node *leaf);         //вывод бинарного дерева в порядке возрастания
+    void print_inorder();                   //вывод бинарного дерева в порядке
+    void print_inorder_to_file(Node *leaf); //вывод бинарного дерева в порядке возрастания
+    void print_inorder_to_file();           //вывод бинарного дерева в порядке
 
 private:
     Node *root; //корень дерева
@@ -73,17 +74,25 @@ void BinaryTree::insert(int data)
     }
 }
 
+void BinaryTree::print_inorder(Node *leaf)
+{
+    if (leaf != nullptr)
+    {
+        print_inorder(leaf->left);
+        cout << leaf->data << " ";
+        print_inorder(leaf->right);
+    }
+}
+
 void BinaryTree::print_inorder_to_file(Node *leaf)
 {
     if (leaf != nullptr)
     {
         print_inorder_to_file(leaf->left);
-        ofstream file;
-        file.open("BinaryTree.txt");
-        file << leaf->data << ", ";
+        ofstream fout;
+        fout.open("BinaryTree.txt", ofstream::app);
         print_inorder_to_file(leaf->right);
-        cout << endl;
-        file.close();
+        fout.close();
     }
 }
 
@@ -92,21 +101,37 @@ void BinaryTree::print_inorder_to_file()
     print_inorder_to_file(root);
 }
 
+void BinaryTree::print_inorder()
+{
+    print_inorder(root);
+    cout << endl;
+}
+
 int main()
 {
-    BinaryTree bt1;
 
-    bt1.insert(8);
-    bt1.insert(11);
-    bt1.insert(7);
-    bt1.insert(3);
-    bt1.insert(4);
-    bt1.insert(5);
-    bt1.insert(9);
-    bt1.insert(13);
-    bt1.insert(12);
-    bt1.insert(6);
-    bt1.insert(10);
+    BinaryTree bt1;
+    int value;
+
+    for (int i = 0; i < 9; i++)
+    {
+        cout << "Enter a value" << endl;
+        cin >> value;
+        bt1.insert(value);
+    }
+
+    ifstream fin;
+    fin.open("BinaryTree.txt");
 
     bt1.print_inorder_to_file();
+
+    while (!fin.eof())
+    {
+        fin >> value;
+        bt1.insert(value);
+    }
+
+    bt1.print_inorder();
+
+    fin.close();
 }
